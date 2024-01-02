@@ -17,7 +17,10 @@ typedef struct {
 	Player player;
 	Player computer;
 } Game;
-
+void drawCard(Player *player) {
+	player->hand[player->numCards].value = rand() % 10 + 1;
+	player->numCards++;
+}
 
 
 int main() {
@@ -27,10 +30,10 @@ int main() {
 	game.player.numCards = 0;
 	game.computer.numCards = 0;
 
-	drawCard();
-	drawCard();
-	drawCard();
-	drawCard();
+	drawCard(&game.player);
+	drawCard(&game.player);
+	drawCard(&game.computer);
+	drawCard(&game.computer);
 
 	playRound();
 
