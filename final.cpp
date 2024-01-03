@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+int coin = 200, contin, bet = 0;
 #define MAX_CARDS 10
 
 typedef struct {
@@ -17,28 +18,10 @@ typedef struct {
 	Player player;
 	Player computer;
 } Game;
+
 void drawCard(Player *player) {
 	player->hand[player->numCards].value = rand() % 10 + 1;
 	player->numCards++;
-}
-
-void displayGameStatus(Game *game) {
-	printf("ç©å®¶æ‰‹ç‰Œ: ");
-	for (int i = 0; i < game->player.numCards; i++) {
-		printf("%d ", game->player.hand[i].value);
-	}
-	printf("\n");
-
-	printf("é›»è…¦æ‰‹ç‰Œ: ");
-	for (int i = 0; i < game->computer.numCards; i++) {
-		if (game->computer.hand[i].value == 1) {
-			printf("A ");
-		}
-		else {
-			printf("%d ", game->computer.hand[i].value);
-		}
-	}
-	printf("\n");
 }
 
 int calculatePoints(Player *player) {
@@ -60,64 +43,116 @@ int calculatePoints(Player *player) {
 	return points;
 }
 
+void displayGameStatus(Game *game) {
+	printf("ª±®a¤âµP: ");
+	for (int i = 0; i < game->player.numCards; i++) {
+		printf("%d ", game->player.hand[i].value);
+	}
+	printf("\n");
+
+	printf("¹q¸£¤âµP: ");
+	for (int i = 0; i < game->computer.numCards; i++) {
+		if (game->computer.hand[i].value == 1) {
+			printf("A ");
+		}
+		else {
+			printf("%d ", game->computer.hand[i].value);
+		}
+	}
+	printf("\n");
+}
+
 void playRound(Game *game) {
 	int playerChoice = 0;
 	while (playerChoice != 2) {
-		printf("é¸æ“‡è¦ç‰Œ(1)æˆ–åœç‰Œ(2): ");
+		displayGameStatus(game);
+
+		// ª±®a¦^¦X
+		printf("¿ï¾Ü­nµP(1)©Î°±µP(2): ");
 		scanf("%d", &playerChoice);
 
 		if (playerChoice == 1) {
 			drawCard(&game->player);
+			if ((calculatePoints(&game->player) <= 21) && (game->player.numCards == 5)) {
+				displayGameStatus(game);
+				printf("¹L¤­Ãö¡Aª±®a³Ó§Q!\n");
+				coin += (bet * 5);
+				printf("§A²{¦b¦³%d¤¸\n", coin);
+				return;
+			}
+
 			if (calculatePoints(&game->player) > 21) {
 				displayGameStatus(game);
-				printf("ç©å®¶çˆ†ç‰Œï¼Œé›»è…¦å‹åˆ©!\n");
+				printf("ª±®aÃzµP¡A¹q¸£³Ó§Q!\n");
+				coin -= bet;
+				printf("§A²{¦b¦³%d¤¸\n", coin);
 				return;
 			}
 		}
 	}
 
+	// ¹q¸£¦^¦X
 	while (calculatePoints(&game->computer) < 17) {
 		drawCard(&game->computer);
 		if (calculatePoints(&game->computer) > 21) {
 			displayGameStatus(game);
-			printf("é›»è…¦çˆ†ç‰Œï¼Œç©å®¶å‹åˆ©!\n");
+			printf("¹q¸£ÃzµP¡Aª±®a³Ó§Q!\n");
+			coin += (bet * 2);
+			printf("§A²{¦b¦³%d¤¸\n", coin);
 			return;
 		}
+
 	}
 
+	// ¤ñ¸ûÂI¼Æ
 	displayGameStatus(game);
 	int playerPoints = calculatePoints(&game->player);
 	int computerPoints = calculatePoints(&game->computer);
 
-	printf("ç©å®¶é»æ•¸: %d\n", playerPoints);
-	printf("é›»è…¦é»æ•¸: %d\n", computerPoints);
+	printf("ª±®aÂI¼Æ: %d\n", playerPoints);
+	printf("¹q¸£ÂI¼Æ: %d\n", computerPoints);
 
 	if (playerPoints > computerPoints) {
-		printf("ç©å®¶å‹åˆ©!\n");
+		printf("ª±®a³Ó§Q!\n");
+		coin += (bet * 2);
+		printf("§A²{¦b¦³%d¤¸\n", coin);
 	}
 	else if (playerPoints < computerPoints) {
-		printf("é›»è…¦å‹åˆ©!\n");
+		printf("¹q¸£³Ó§Q!\n");
+		coin -= bet;
+		printf("§A²{¦b¦³%d¤¸\n", coin);
 	}
 	else {
-		printf("å¹³å±€!\n");
+		printf("¥­§½!\n");
 	}
 }
 
 
-
 int main() {
-	srand((unsigned)time(NULL));
+	srand((unsigned int)time(NULL));
 
-	Game game;
-	game.player.numCards = 0;
-	game.computer.numCards = 0;
+	printf("§A²{¦b¦³200¤¸\n");
+	do {
+		Game game;
+		game.player.numCards = 0;
+		game.computer.numCards = 0;
 
-	drawCard(&game.player);
-	drawCard(&game.player);
-	drawCard(&game.computer);
-	drawCard(&game.computer);
+		printf("¿é¤J½äª÷:");
+		scanf("%d", &bet);
+		
 
-	playRound(&game);
+
+		drawCard(&game.player);
+		drawCard(&game.player);
+		drawCard(&game.computer);
+		drawCard(&game.computer);
+
+		playRound(&game);
+		if (coin <= 0) break;
+		printf("\n«ö0Ä~Äò¡A¨ä¥LÁä«hµ²§ô:");
+		scanf("%d", &contin);
+
+	} while (contin == 0);
 
 	return 0;
 }
